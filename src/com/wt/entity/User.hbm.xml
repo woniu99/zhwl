@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+
+    <class name="com.wt.entity.User" table="USER">
+    
+        <id name="user_id" type="java.lang.Integer">
+            <column name="USER_ID" />
+            <generator class="native" />
+        </id>
+        
+        <property name="user_name" type="java.lang.String">
+            <column name="USER_NAME" />
+        </property>
+        
+        <property name="user_email" type="java.lang.String">
+            <column name="USER_EMAIL" />
+        </property>
+        
+        <property name="user_phone" type="java.lang.Long">
+            <column name="USER_PHONE" />
+        </property>
+        
+        <property name="user_address" type="java.lang.String">
+            <column name="USER_ADDRESS" />
+        </property>
+        
+        <property name="user_password" type="java.lang.String">
+            <column name="USER_PASSWORD" />
+        </property>
+        
+        <property name="createTime" type="java.util.Date">
+            <column name="CREATE_TIME" />
+        </property>
+        
+        <property name="user_state" type="java.lang.Integer">
+            <column name="USER_STATE"/>
+        </property>
+        
+    </class>
+    
+</hibernate-mapping>

@@ -1,0 +1,47 @@
+/*--index--*/
+#carousel-generic, #carousel, .item{
+	height: 400px;	
+}
+
+#title {
+	position: fixed;
+	top: 50px;
+	left: 100px;
+	font-size: 50px;
+}
+
+#title-tail {
+	position: fixed;
+	top: 130px;
+	left: 210px;
+	font-size: 25px;
+}
+
+/*--div ²¿·Ö--*/
+.left {
+	margin-right: 17px;
+	height: 362px;
+	width: 222px;
+	float: left 
+}
+/*--index_content--*/
+#login {
+	position: fixed;
+	top: 50px;
+	right: 100px;
+	font-size: 50px;
+}
+.span_1_of_4{
+	margin-right: 15px;
+}
+.cao{
+	float: left;	
+}
+
+/*--footer--*/
+.footer {
+    left: 0;
+    right: 0;
+    height: 80px;
+    margin-top: 20px;
+}

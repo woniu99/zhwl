@@ -1,0 +1,348 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC
+	"-//Apache Software Foundation//DTD Struts Configuration 2.3//EN"
+	"http://struts.apache.org/dtds/struts-2.3.dtd">
+
+<struts>
+
+	<!-- 配置 Struts2 可以受理的请求的扩展名 -->
+	<constant name="struts.action.extension" value="action,do,"></constant> 
+
+    <constant name="struts.enable.DynamicMethodInvocation" value="false" />
+    <constant name="struts.devMode" value="true" />
+    <constant name="struts.action.excludePattern" value="/static/.*?" />
+	
+	
+	<!-- 设置浏览器是否缓存静态内容,默认值为true(生产环境下使用),开发阶段最好关闭 -->
+    <constant name="struts.serve.static.browserCache" value="false" />
+    
+    <!-- 当struts的配置文件修改后,系统是否自动重新加载该文件,默认值为false(生产环境下使用),开发阶段最好打开 -->
+    <constant name="struts.configuration.xml.reload" value="true" />
+    
+    <!-- 开发模式下使用,这样可以打印出更详细的错误信息 -->
+    <constant name="struts.devMode" value="true" />
+
+    <package name="default" namespace="/" extends="struts-default">
+    
+    	<!-- 自定义拦截器栈  -->
+		<interceptors>
+			
+			<!-- 自定义管理员需要登录的拦截器 -->
+			<interceptor name="adminLoginInterceptor" 
+				class="com.wt.interceptor.AdminLoginInterceptor">
+			</interceptor>
+			
+			<!-- 自定义用户需要登录的拦截器 -->
+			<interceptor name="userLoginInterceptor" 
+				class="com.wt.interceptor.UserLoginInterceptor">
+			</interceptor>
+			
+			<!-- 自定义用户查看购物车时需要登录的拦截器 -->
+			<interceptor name="userShoppingInfoLoginInterceptor" 
+				class="com.wt.interceptor.UserLoginShoppingInfoInterceptor">
+			</interceptor>
+			
+			<!-- 自定义用户查看订单配送时需要登录的拦截器 -->
+			<interceptor name="userLogisticsInfoLoginInterceptor" 
+				class="com.wt.interceptor.UserLoginLogisticsInterceptor">
+			</interceptor>
+			
+			<interceptor-stack name="loginStack">
+				<interceptor-ref name="defaultStack" />
+				
+				<!-- 自定义用户需要登录的拦截器 -->
+				<interceptor-ref name="userLoginInterceptor" />
+				
+				<!-- 自定义管理员需要登录的拦截器 -->
+				<interceptor-ref name="adminLoginInterceptor" />
+			</interceptor-stack>
+			
+		</interceptors>
+		
+		<!-- 定义全局Result -->  
+        <global-results>  
+            <!-- 当返回adminLogin视图名时，转入管理员登录页面 -->  
+            <result name="adminLogin">/WEB-INF/admin/admin_login.jsp</result> 
+            <result name="userLogin">/WEB-INF/user/buy_login.jsp</result>
+            <result name="userShoppingInfoLogin">/WEB-INF/user/shopping_login.jsp</result>
+            <result name="userLogisticsLogin">/WEB-INF/user/logistics_login.jsp</result>
+        </global-results>  
+        
+		
+		<action name="user-*" class="userAction"
+        	method="{1}">
+        	
+			<result name="list">/index.jsp</result>
+			
+			<result name="exit">/index.jsp</result>
+			
+			<result name="ajax-success" type="stream">
+		        <param name="contentType">text/html</param>
+		        <param name="inputName">inputStream</param>
+		    </result>
+			
+		</action>
+		
+		<action name="order-update" class="orderAction"
+        	method="update">
+			<result name="ajax-success" type="stream">
+		        <param name="contentType">text/html</param>
+		        <param name="inputName">inputStream</param>
+		    </result>
+			
+		</action>
+		
+		<action name="order-*" class="orderAction"
+        	method="{1}">
+        	
+			<result name="save">/WEB-INF/shopping/shopping_info.jsp</result>
+			
+			<!-- 使用自定义用户需要登录的拦截器 -->  
+            <interceptor-ref name="userLoginInterceptor" />  
+		</action>
+		
+		<!-- 获取验证码 -->
+		<action name="captcha" class="com.wt.action.VerifyCodeAction"
+				method="captcha">
+			
+		</action>
+		
+		<action name="createImageAction" class="com.wt.action.CreateImageAction">
+			<result name="success" type="stream">
+                <param name="contentType">image/jpeg</param>
+                <param name="inputName">inputStream</param>
+            </result>
+		</action>
+
+		<!-- 用户登录跳转链接 -->		
+		<action name="userLogin">
+			<result>/WEB-INF/user/login.jsp</result>
+		</action>
+		
+		<!-- 用户重新登录跳转链接 -->		
+		<action name="userResetLogin">
+			<result>/WEB-INF/user/reset_login.jsp</result>
+		</action>
+		
+		<!-- 用户注册跳转链接 -->		
+		<action name="userRegister">
+			<result>/WEB-INF/user/register.jsp</result>
+		</action>
+		
+		<!-- 用户更改密码跳转到发送验证邮件的链接 -->
+		<action name="applyResetPassword">
+			<result>/WEB-INF/user/apply_reset_password.jsp</result>
+		</action>
+		
+		<!-- 用户更改密码跳转链接 -->
+		<action name="resetPassword">
+			<result>/WEB-INF/user/reset_password.jsp</result>
+		</action>
+		
+		<!-- 用户名验证 -->
+		<action name="usernameCheck" class="userValidate"
+				method="usernameCheck">
+	    	<result name="usernameSuccess" type="httpheader">  
+		    	<param name="status">200</param>
+		    </result>
+		    
+		    <result name="usernameError" type="httpheader">  
+		    	<param name="status">400</param>
+		    </result>
+        </action>
+        
+        <!-- 邮箱验证 -->
+		<action name="emailCheck" class="userValidate"
+				method="emailCheck">
+	    	<result name="emailSuccess" type="httpheader">  
+		    	<param name="status">200</param>
+		    </result>
+		    
+		    <result name="emailError" type="httpheader">  
+		    	<param name="status">400</param>
+		    </result>
+        </action>
+        
+        <!-- 发送邮件修改密码时的邮箱验证 -->
+        <action name="resetPasswordEmailCheck" class="userValidate"
+				method="resetPasswordEmailCheck">
+	    	<result name="emailSuccess" type="httpheader">  
+		    	<param name="status">200</param>
+		    </result>
+		    
+		    <result name="emailError" type="httpheader">  
+		    	<param name="status">400</param>
+		    </result>
+        </action>
+        
+		<!-- 跳转到购物页面  -->
+		<action name="userShopping">
+			<result>/WEB-INF/shopping/shopping.jsp</result>
+			
+			<!-- 使用自定义管理员需要登录的拦截器 -->  
+            <interceptor-ref name="userLoginInterceptor" />  
+		</action>
+		
+		<!-- 跳转到游戏部分的页面  -->
+		<action name="userGame">
+			<result>/WEB-INF/game/game.jsp</result>
+		</action>
+		
+		<!-- 跳转到html介绍页面  -->
+		<action name="htmlMore">
+			<result>/WEB-INF/book_readMore/html_more.jsp</result>
+		</action>
+		
+		<!-- 跳转到java购物页面  -->
+		<action name="javaBuy">
+			<result>/WEB-INF/trolley/java_trolley.jsp</result>
+		</action>
+		
+		<!-- 跳转到html购物页面  -->
+		<action name="htmlBuy">
+			<result>/WEB-INF/trolley/html_trolley.jsp</result>
+		</action>
+		
+		<!-- 跳转到用户的购物车页面 -->		
+		<action name="userShoppingInfo" class="com.wt.action.OrderAction"
+				method="shoppingInfo">
+			<result name="shoppingInfo">/WEB-INF/shopping/shopping_info.jsp</result>
+			
+			<!-- 使用自定义用户需要登录的拦截器 -->  
+            <interceptor-ref name="userShoppingInfoLoginInterceptor" />  
+		</action>
+		
+		<!-- 以下为管理员部分的链接配置 -->
+		
+		<!-- 跳转到管理员页面  -->
+		<action name="adminPage" class="com.wt.action.AdminAction"
+			    method="userList">
+			<result name="userList">/WEB-INF/admin/admin_index.jsp</result>
+			<!-- 使用自定义管理员需要登录的拦截器 -->  
+            <interceptor-ref name="adminLoginInterceptor" />  
+		</action>
+		
+		<!-- 跳转到管理员订单页面  -->
+		<action name="adminOrder" class="com.wt.action.AdminAction"
+			    method="orderList">
+			<result name="orderList">/WEB-INF/admin/admin_order.jsp</result>
+			<!-- 使用自定义管理员需要登录的拦截器 -->  
+            <interceptor-ref name="adminLoginInterceptor" />  
+		</action>
+		
+		<!-- 跳转到管理员图片管理页面  -->
+		<action name="adminGallery">
+			<result>/WEB-INF/admin/admin_gallery.jsp</result>
+			<!-- 使用自定义管理员需要登录的拦截器 -->  
+            <interceptor-ref name="adminLoginInterceptor" />  
+		</action>
+		
+		<!-- 跳转到管理员文件管理页面  -->
+		<!-- 显示文件列表 -->
+		<action name="adminFile" class="com.wt.fileHandle.FileHandle"
+			method="fileList" >
+			
+			<result name="fileList">/WEB-INF/admin/admin_file.jsp</result>
+			
+			<!-- 使用自定义管理员需要登录的拦截器 -->  
+            <interceptor-ref name="adminLoginInterceptor" />  
+		</action>
+		
+		<!-- 跳转到管理员文件管理页面  -->
+		<!-- 执行文件的下载 -->
+		<action name="adminDownLoadFile" class="com.wt.fileHandle.FileHandle"
+			method="downLoadFile" >
+			
+			<result>/WEB-INF/admin/admin_file.jsp</result>
+			
+			<!-- 使用自定义管理员需要登录的拦截器 -->  
+            <interceptor-ref name="adminLoginInterceptor" />  
+		</action>
+		
+		<!-- 跳转到管理员登录页面  -->
+		<action name="adminLogin">
+			<result>/WEB-INF/admin/admin_login.jsp</result>
+		</action>
+
+		<!-- 跳转到订单配送中心页面 -->
+		<action name="userLogisticsInfo" class="com.wt.action.OrderAction"
+				method="logisticsInfo">
+			<result name="logisticsInfo">/WEB-INF/logistics/logistics.jsp</result>
+			
+			<!-- 使用自定义用户需要登录的拦截器 -->  
+            <interceptor-ref name="userLogisticsInfoLoginInterceptor" />  
+		</action>
+		
+		<!-- 跳转到用户信息修改设置的页面 -->
+		<action name="userInfoSetting">
+			<result >/WEB-INF/user/userInfo_setting.jsp</result>
+			
+			<!-- 使用自定义用户需要登录的拦截器 -->  
+            <interceptor-ref name="userLoginInterceptor" />  
+		</action>
+		
+		<!-- 配置错误页面 -->
+		<!-- 通过通配方式跳转，防止页面地址乱请求 -->
+	    <!-- 只要找不到对应的action都自动跳转到404 errorPage页面中 -->
+	    <action name="*">
+	        <result type="redirect">/errorPage.jsp</result>
+	    </action>
+		
+    </package>
+    
+    <package name="json" extends="json-default" namespace="/">
+    
+    	<!-- 以下为用户登录时的json数据的配置 -->
+    	<action name="jsonLogin" class="com.wt.jsonHandle.LoginJsonHandle"
+				method="jsonLogin">
+            <!-- 此处将reslut的值返回给客户端，root的值对应要返回的值的属性result
+                                                   注意：root为固定写法，否则不会把result的值返回给客户端 -->
+			<result type="json">
+				<param name="root">dataMap</param>
+			</result>
+		</action>
+		
+		<!-- 以下为用户注册时的json数据的配置 -->
+		<action name="save" class="com.wt.jsonHandle.RegisterJsonHandle"
+				method="save">
+            <!-- 此处将reslut的值返回给客户端，root的值对应要返回的值的属性result
+                                                   注意：root为固定写法，否则不会把result的值返回给客户端 -->
+			<result type="json">
+				<param name="root">dataMap</param>
+			</result>
+		</action>
+    
+    	<!-- 以下为管理员登录时的json数据的配置 -->
+    	<action name="jsonAdminLogin" class="com.wt.jsonHandle.AdminLoginJsonHandle"
+				method="jsonAdminLogin">
+            <!-- 此处将reslut的值返回给客户端，root的值对应要返回的值的属性result
+                                                   注意：root为固定写法，否则不会把result的值返回给客户端 -->
+			<result type="json">
+				<param name="root">dataMap</param>
+			</result>
+		</action>
+		
+		<!-- 以下为用户修改密码时的json数据的配置 -->
+    	<action name="jsonApplyResetPassword" class="com.wt.jsonHandle.ApplyResetPasswordJsonHandle"
+				method="jsonApplyResetPassword">
+            <!-- 此处将reslut的值返回给客户端，root的值对应要返回的值的属性result
+                                                   注意：root为固定写法，否则不会把result的值返回给客户端 -->
+			<result type="json">
+				<param name="root">dataMap</param>
+			</result>
+		</action>
+		
+		<!-- 以下为用户修改密码时的json数据的配置 -->
+    	<action name="jsonResetPassword" class="com.wt.jsonHandle.ResetPasswordJsonHandle"
+				method="jsonResetPassword">
+            <!-- 此处将reslut的值返回给客户端，root的值对应要返回的值的属性result
+                                                   注意：root为固定写法，否则不会把result的值返回给客户端 -->
+			<result type="json">
+				<param name="root">dataMap</param>
+			</result>
+		</action>
+    	
+    </package>
+    
+
+</struts>
